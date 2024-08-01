@@ -1,5 +1,6 @@
 @echo OFF
 ::vars
+SETLOCAL ENABLEDELAYEDEXPANSION
 set defloc=%~dp0
 set domain=http://backup.xdev.lol
 set downdomain=%domain%/omega-iii/omega-iii
@@ -81,10 +82,44 @@ goto :execcommand
 if not defined terminal goto :terminal
 if "%terminal%" == "exit" goto :ext
 if "%terminal%" == "help" goto :help
-if exist "%defloc%kernel.bat" call "%defloc%kernel.bat" %terminal%
-if not exist "%defloc%kernel.bat" goto :kernelerror
-goto :terminal
+if "%terminal%" == "clear" cls && goto :terminal
 
+if not exist "%defloc%kernelhash.sha512" (
+    echo kernelhash.sha512 not found, downloading...
+    %defloc%lib\curl.exe %downdomain%/kernelhash.sha512 --output %defloc%kernelhash.sha512
+)
+
+set count=0
+for /f "tokens=1* delims=:" %%A in ('"%defloc%lib\certutil.exe -hashfile %defloc%kernel.bat SHA512"') do (
+    set /a count+=1
+    if !count! EQU 2 (
+        set "kernelhash=%%A %%B"
+    )
+)
+set "kernelhash=%kernelhash:~0,-1%"
+
+set count=0
+for /f "tokens=*" %%A in (%defloc%kernelhash.sha512) do (
+    set /a count+=1
+    if !count! EQU 2 (
+        set "setkernelhash=%%A"
+    )
+)
+
+if "%kernelhash%" == "%setkernelhash%" (
+    if exist "%defloc%kernel.bat" (
+        call "%defloc%kernel.bat" %terminal%
+    ) else (
+        goto :kernelerror
+    )
+) else (
+    echo kernel checksum mismatch
+    echo kernelhash: "%kernelhash%"
+    echo setkernelhash: "%setkernelhash%"
+    goto :kernelerror
+)
+
+goto :terminal
 
 :kernelerror
 echo critical kernel error, maybe deleted? reinstalling.
