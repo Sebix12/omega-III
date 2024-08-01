@@ -43,4 +43,5 @@ File access tree:
                 comp
                 get
         
-        
+
+commands: omega.cmd (clean-install/update-kernel)
