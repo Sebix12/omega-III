@@ -1,14 +1,90 @@
 @echo OFF
 setlocal EnableDelayedExpansion
-
+set kernelver=1.0
 set defloc=%~dp0
 set domain=http://backup.xdev.lol
 set downdomain=%domain%/omega-iii/omega-iii
-set assets=certutil.exe cipher.exe curl.exe tar.exe
+set assets=certutil.exe cipher.exe curl.exe tar.exe 
 
-set kernelver=1.0
-
+::oh no
 if "%1" == "checkup" goto :checkup
+if "%1" == "fs" goto :fs
+if "%1" == "pl" goto :pl
+if "%1" == "pussy" goto :xd
+
+
+:pl
+if exist %defloc%db cd /d %defloc%db
+if "%2" == "list" goto :pl_list
+if "%2" == "run" goto :pl_run
+if "%2" == "remove" goto :pl_remove
+if "%2" == "get" goto :pl_getpl
+echo not supported yet...
+goto :ext
+
+:pl_list
+dir /b /x *.db
+goto :ext
+
+:pl_run
+if not exist %defloc%db\%3.db goto :runnotexist 
+certutil -decode %defloc%db\%3.db %defloc%db\%3.bat >> NUL
+call %defloc%db\%3.bat
+del /q %defloc%db\%3.bat
+goto :ext
+
+:runnotexist
+echo %3 does not exist try "pl list"
+goto :ext
+
+:pl_remove
+if exist %3.bat del /q %3.bat && echo removed %3.bat
+if exist %3.db del /q %3.db && echo removed %3.db
+goto :ext
+
+:pl_getpl
+if exist %3.db echo %3 is already downloaded
+if exist %3.db goto :ext
+echo downloading %3 %downdomain%/plugin-repo/%3.db
+%defloc%lib\curl.exe %downdomain%/plugin-repo/%3.db --output %defloc%db\%3.db
+if exist %3.db echo download succeeded
+if not exist %3.db echo download failed
+goto :ext
+
+
+:fs
+if "%2" == "rm" goto :fs_rm
+if "%2" == "mkdir" goto :fs_mkdir
+if "%2" == "rmdir" goto :fs_rmdir
+if "%2" == "run" goto :fs_run
+echo not yet supported...
+goto :ext
+::------
+
+:fs_rm
+del %3
+echo deleted file: %3
+goto :ext
+::------
+:fs_mkdir
+mkdir %3
+echo created folder %3
+goto :ext
+::------
+:fs_rmdir
+rmdir %3
+echo deleted %3
+goto :ext
+::------
+:fs_run
+if not exist %3 echo %3 does not exist.
+if not exist %3 goto :ext
+if exist %3 echo %3 found, running it...
+call %3
+goto :ext
+::------
+goto :ext
+
 
 :checkup
 echo :----------------------------:
@@ -80,4 +156,9 @@ cd /d "%defloc%"
 echo :----------------------------:
 goto :ext
 
+:xd
+
+goto :ext
+
 :ext
+cd /d %defloc%

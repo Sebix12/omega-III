@@ -10,8 +10,9 @@ set downdomain=%domain%/omega-iii/omega-iii
 if "%1" == "clean-install" goto :reclone
 if "%1" == "update-kernel" goto :update_kernel
 
-:aftersubcommands
 
+
+:aftercleaninstall
 ::checkup
 if not exist "lib" goto :checkup_getlib
 :checkup_afterlib
@@ -165,18 +166,19 @@ echo help
 del help.db
 
 echo restarting
-goto :aftersubcommands
+goto :aftercleaninstall
 
 
 :update_kernel
 echo updating kernel
 echo removing last kernel
-del %defloc%kernel.bat
+if exist "%defloc%kernel.bat" del /Q "%defloc%kernel.bat"
 echo installing latest kernel
-if exist "%defloc%lib\curl.exe" %defloc%lib\curl.exe %downdomain%/kernel.bat --output %defloc%kernel.bat
+if exist "%defloc%kernelhash.sha512" del /Q kernelhash.sha512
+if exist "%defloc%lib\curl.exe" %defloc%lib\curl.exe %downdomain%/kernel.bat --output "%defloc%kernel.bat"
 if exist %defloc%kernel.bat echo kernel successfully installed.
 if not exist %defloc%kernel.bat echo kernel failed to install.
-goto :aftersubcommands
+goto :ext
 
 
 
