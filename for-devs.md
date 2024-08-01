@@ -15,7 +15,7 @@ Domains: [ backup.xdev.lol/omega-iii ]:
 
 Vars: 
     -%domain% = backup.xdev.lol
-    -%downdomain% = !domain!/omega-iii/omega-iii/ : (backup.xdev.lol/omega-iii/omega-iii/)
+    -%downdomain% = !domain!/omega-iii/omega-iii : (backup.xdev.lol/omega-iii/omega-iii)
     -%defloc% = start directory
     -
     -
