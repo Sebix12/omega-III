@@ -5,5 +5,5 @@ set defloc=%~dp0
 
 %defloc%lib\certutil.exe -hashfile %defloc%kernel.bat SHA512 > kernelhash.sha512
 echo generated hash %time%
-timeout /t 2 /nobreak > nul
+timeout /t 1 /nobreak > nul
 goto :A

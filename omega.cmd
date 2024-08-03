@@ -12,6 +12,7 @@ if "%1" == "update-kernel" goto :update_kernel
 if "%1" == "update-kernel-hash" goto :update_kernel_hash
 if "%1" == "use-custom-kernel" goto :use_custom_kernel
 
+if exist "%defloc%kernel.bat" call "%defloc%kernel.bat" setup
 
 
 
@@ -112,7 +113,7 @@ for /f "tokens=1* delims=:" %%A in ('""%defloc%lib\certutil.exe" -hashfile %defl
 set "kernelhash=%kernelhash:~0,-1%"
 
 set count=0
-for /f "tokens=*" %%A in ("%defloc%kernelhash.sha512") do (
+for /f "tokens=*" %%A in (%defloc%kernelhash.sha512) do (
     set /a count+=1
     if !count! EQU 2 (
         set "setkernelhash=%%A"
@@ -189,18 +190,21 @@ echo Updated kernel hash at %time% new hash:
 goto :ext
 
 :use_custom_kernel
+:: set defloc=C:\Users\Sebixteam\Desktop\omega\
+
 if exist "%defloc%kernel.bat" echo deleting old kernel
+
 if exist "%defloc%kernel.bat" del /Q "%defloc%kernel.bat"
-echo copying new kernel
-if defined %2 if exist %2 copy /V %2 "%defloc%"
-if exist "%defloc%%2" echo successfully copied %2 to %defloc%%2
-echo creating new hash
+
+copy /V /Y "F:\omega-III\kernel.bat" "%defloc%kernel.bat"
+
+if exist "%defloc%kernel.bat" echo successfully copied %2 to %defloc%
+
 if exist "%defloc%kernelhash.sha512" del /Q "%defloc%kernelhash.sha512"
+
 "%defloc%lib\certutil.exe" -hashfile "%defloc%kernel.bat" SHA512 > kernelhash.sha512
-echo Updated kernel hash at %time% new hash:
-"%defloc%lib\certutil.exe" -hashfile "%defloc%kernel.bat" SHA512
-if exist "%defloc%kernelhash.sha512" echo hash created successfully
-echo starting with new kernel
+
+call "%defloc%kernel.bat" setup
 goto :aftercustomkernel
 
 

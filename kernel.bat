@@ -1,4 +1,4 @@
-@echo OFF
+::@echo OFF
 setlocal EnableDelayedExpansion
 set kernelver=1.0
 set defloc=%~dp0
@@ -11,10 +11,15 @@ if "%1" == "checkup" goto :checkup
 if "%1" == "fs" goto :fs
 if "%1" == "pl" goto :pl
 if "%1" == "help" goto :help
+if "%1" == "kernel" goto :kernel
 if "%1" == "clear" cls && goto :ext
 if "%1" == "dir" dir /b && goto :ext
 if "%1" == "ls" dir /b && goto :ext
 if "%1" == "tree" tree && goto :ext
+if "%1" == "setup" goto :onecall
+
+echo command not found
+goto :ext
 
 
 
@@ -180,12 +185,19 @@ goto :ext
 
 :kernel
 if "%2" == "version" echo kernel version: %kernelver% && goto :ext
+if "%2" == "debug" goto :KBS
+if "%2" == "hash" type "%defloc%kernelhash.sha512" && goto :ext
+
 echo command not supported yet...
 goto :ext
 
+:onecall
+echo Kernel launch succeeded
+goto :ext
 
-
-
+:KBS
+ECHO %3
+goto :ext
 
 
 goto :ext
