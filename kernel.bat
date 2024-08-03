@@ -7,16 +7,18 @@ set downdomain=%domain%/omega-iii/omega-iii
 set assets=certutil.exe cipher.exe curl.exe tar.exe 
 
 ::oh no
+if "%1" == "setup" goto :onecall
 if "%1" == "checkup" goto :checkup
 if "%1" == "fs" goto :fs
 if "%1" == "pl" goto :pl
-if "%1" == "help" goto :help
+if "%1" == "crypt" goto :crypt
+if "%1" == "datamg" goto :datamg
 if "%1" == "kernel" goto :kernel
+if "%1" == "help" goto :help
 if "%1" == "clear" cls && goto :ext
 if "%1" == "dir" dir /b && goto :ext
 if "%1" == "ls" dir /b && goto :ext
 if "%1" == "tree" tree && goto :ext
-if "%1" == "setup" goto :onecall
 
 echo command not found
 goto :ext
@@ -29,8 +31,19 @@ if "%2" == "list" goto :pl_list
 if "%2" == "run" goto :pl_run
 if "%2" == "remove" goto :pl_remove
 if "%2" == "get" goto :pl_getpl
+goto :list_pl_help
 echo not supported yet...
 goto :ext
+
+:list_pl_help
+echo -----
+echo list
+echo run
+echo remove
+echo get
+echo -----
+goto :ext
+
 
 :pl_list
 cd /d "%defloc%db"
@@ -69,7 +82,16 @@ if "%2" == "rm" goto :fs_rm
 if "%2" == "mkdir" goto :fs_mkdir
 if "%2" == "rmdir" goto :fs_rmdir
 if "%2" == "run" goto :fs_run
-echo not yet supported...
+goto :list_fs_help
+goto :ext
+
+:list_fs_help
+echo -----
+echo rm
+echo mkdir
+echo rmdir
+echo run
+echo -----
 goto :ext
 ::------
 
@@ -199,6 +221,43 @@ goto :ext
 ECHO %3
 goto :ext
 
+:crypt
+if "%2" == "cert" goto :certutil
+if "%2" == "ciph" goto :cipher
+echo command not found...
+goto :ext
+
+:certutil
+if "%3" == "encode" goto :cert_encode
+if "%3" == "decode" goto :cert_decode
+if "%3" == "hashfile" goto :cert_hashfile
+
+:cert_encode
+"%defloc%lib\certutil.exe" -encode %4 %5
+goto :ext
+
+:cert_decode
+"%defloc%lib\certutil.exe" -decode %4 %5
+goto :ext
+
+:cert_hashfile
+"%defloc%lib\certutil.exe" -hashfile %4 %5 > %6
+goto :ext
+
+:cipher
+if "%3" == "" goto :ciph_encrypt
+if "%3" == "" goto :ciph_decrypt
+
+:ciph_encrypt
+:ciph_decrypt
+goto :ext
+
+
+:datamg
+::if "%2" == "comp" goto :tar
+::if "%2" == "" goto :
+echo command not found...
+goto :ext
 
 goto :ext
 

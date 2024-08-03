@@ -16,6 +16,12 @@ fs:
     mkdir
     rmdir
     run
-
-
+crypt:
+    certutil:
+        -encode
+        -decode
+        -hashfile
+    cipher:
+        -encrypt
+        -decrypt
 ----------------------
