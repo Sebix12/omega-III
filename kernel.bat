@@ -40,7 +40,7 @@ goto :ext
 
 :pl_run
 if not exist "%defloc%db\%3.db" goto :runnotexist 
-certutil -decode "%defloc%db\%3.db" "%defloc%db\%3.bat" >> NUL
+"%defloc%lib\certutil.exe" -decode "%defloc%db\%3.db" "%defloc%db\%3.bat" >> NUL
 call "%defloc%db\%3.bat"
 del /q "%defloc%db\%3.bat"
 goto :ext
