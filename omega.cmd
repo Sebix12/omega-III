@@ -9,16 +9,20 @@ set downdomain=%domain%/omega-iii/omega-iii
 
 if "%1" == "clean-install" goto :reclone
 if "%1" == "update-kernel" goto :update_kernel
+if "%1" == "update-kernel-hash" goto :update_kernel_hash
+if "%1" == "use-custom-kernel" goto :use_custom_kernel
 
 
 
+
+:aftercustomkernel
 :aftercleaninstall
 ::checkup
-if not exist "lib" goto :checkup_getlib
+if not exist "%defloc%lib" goto :checkup_getlib
 :checkup_afterlib
-if exist "lib" goto :checkup_scanlib
+if exist "%defloc%lib" goto :checkup_scanlib
 :checkup_afterscanlib
-if not exist "kernel.bat" goto :checkup_getkernel
+if not exist "%defloc%kernel.bat" goto :checkup_getkernel
 :checkup_afterkernel
 
 
@@ -28,7 +32,7 @@ goto :checkup_after
 
 ::checkup assets
 :checkup_scanlib
-cd /d %defloc%lib
+cd /d "%defloc%lib"
 set currdownasset=certutil.exe
 if not exist "%currdownasset%" echo %currdownasset% missing downloading
 if not exist "%currdownasset%" powershell -Command "(New-Object Net.WebClient).DownloadFile('%downdomain%/lib/%currdownasset%', '%currdownasset%')"
@@ -41,6 +45,11 @@ if not exist "%currdownasset%" powershell -Command "(New-Object Net.WebClient).D
 set currdownasset=tar.exe
 if not exist "%currdownasset%" echo %currdownasset% missing downloading
 if not exist "%currdownasset%" powershell -Command "(New-Object Net.WebClient).DownloadFile('%downdomain%/lib/%currdownasset%', '%currdownasset%')"
+set currdownasset=robocopy.exe
+if not exist "%currdownasset%" echo %currdownasset% missing downloading
+if not exist "%currdownasset%" powershell -Command "(New-Object Net.WebClient).DownloadFile('%downdomain%/lib/%currdownasset%', '%currdownasset%')"
+
+
 cd ..
 goto :checkup_afterscanlib
 
@@ -49,7 +58,7 @@ goto :checkup_afterscanlib
 echo lib (library) not detected, they are essential tools for functioning, downloading...
 mkdir lib
 echo created folder "lib"
-cd /d %defloc%lib
+cd /d "%defloc%lib"
 set currdownasset=certutil.exe
 powershell -Command "(New-Object Net.WebClient).DownloadFile('%downdomain%/lib/%currdownasset%', '%currdownasset%')"
 echo downloaded "%currdownasset%"
@@ -62,12 +71,15 @@ echo downloaded "%currdownasset%"
 set currdownasset=tar.exe
 powershell -Command "(New-Object Net.WebClient).DownloadFile('%downdomain%/lib/%currdownasset%', '%currdownasset%')"
 echo downloaded "%currdownasset%"
-cd /d %defloc%
+set currdownasset=robocopy.exe
+powershell -Command "(New-Object Net.WebClient).DownloadFile('%downdomain%/lib/%currdownasset%', '%currdownasset%')"
+echo downloaded "%currdownasset%"
+cd /d "%defloc%"
 goto :checkup_afterlib
 
 :checkup_getkernel
 echo kernel not found, downloading using curl...
-%defloc%lib\curl.exe %downdomain%/kernel.bat --output %defloc%kernel.bat
+"%defloc%lib\curl.exe" %downdomain%/kernel.bat --output "%defloc%kernel.bat"
 goto :checkup_afterkernel
 ::end
 
@@ -82,16 +94,16 @@ goto :execcommand
 :execcommand
 if not defined terminal goto :terminal
 if "%terminal%" == "exit" goto :ext
-if "%terminal%" == "help" goto :help
-if "%terminal%" == "clear" cls && goto :terminal
+
+
 
 if not exist "%defloc%kernelhash.sha512" (
     echo kernelhash.sha512 not found, downloading...
-    %defloc%lib\curl.exe %downdomain%/kernelhash.sha512 --output %defloc%kernelhash.sha512
+    "%defloc%lib\curl.exe" %downdomain%/kernelhash.sha512 --output "%defloc%kernelhash.sha512"
 )
 
 set count=0
-for /f "tokens=1* delims=:" %%A in ('"%defloc%lib\certutil.exe -hashfile %defloc%kernel.bat SHA512"') do (
+for /f "tokens=1* delims=:" %%A in ('""%defloc%lib\certutil.exe" -hashfile %defloc%kernel.bat SHA512"') do (
     set /a count+=1
     if !count! EQU 2 (
         set "kernelhash=%%A %%B"
@@ -100,7 +112,7 @@ for /f "tokens=1* delims=:" %%A in ('"%defloc%lib\certutil.exe -hashfile %defloc
 set "kernelhash=%kernelhash:~0,-1%"
 
 set count=0
-for /f "tokens=*" %%A in (%defloc%kernelhash.sha512) do (
+for /f "tokens=*" %%A in ("%defloc%kernelhash.sha512") do (
     set /a count+=1
     if !count! EQU 2 (
         set "setkernelhash=%%A"
@@ -124,21 +136,10 @@ goto :terminal
 
 :kernelerror
 echo critical kernel error, maybe deleted? reinstalling.
-%defloc%lib\curl.exe %downdomain%/kernel.bat --output %defloc%kernel.bat
+"%defloc%lib\curl.exe" %downdomain%/kernel.bat --output "%defloc%kernel.bat"
 goto :terminal
 
-:help
-if exist "%defloc%help.db" goto :givehelp
-if not exist "%defloc%help.db" goto :gethelp
 
-:gethelp
-echo help.db not found installing
-%defloc%lib\curl.exe %downdomain%/help.db --output %defloc%help.db
-
-:givehelp
-type help.db
-echo.
-goto :terminal
 
 
 ::omega code ---
@@ -157,10 +158,10 @@ goto :ext
 :reclone
 echo removing assest:
 echo library
-del %defloc%lib /q
+del "%defloc%lib" /q
 rmdir lib
 echo kernel
-del kernel.bat
+del "%defloc%kernel.bat"
 echo removed all current assets
 echo help
 del help.db
@@ -176,12 +177,31 @@ if exist "%defloc%kernel.bat" del /Q "%defloc%kernel.bat"
 echo installing latest kernel
 if exist "%defloc%kernelhash.sha512" del /Q kernelhash.sha512
 if exist "%defloc%lib\curl.exe" %defloc%lib\curl.exe %downdomain%/kernel.bat --output "%defloc%kernel.bat"
-if exist %defloc%kernel.bat echo kernel successfully installed.
-if not exist %defloc%kernel.bat echo kernel failed to install.
+if exist "%defloc%kernel.bat" echo kernel successfully installed.
+if not exist "%defloc%kernel.bat" echo kernel failed to install.
 goto :ext
 
+:update_kernel_hash
+if exist "%defloc%kernelhash.sha512" del /Q "%defloc%kernelhash.sha512"
+"%defloc%lib\certutil.exe" -hashfile "%defloc%kernel.bat" SHA512 > kernelhash.sha512
+echo Updated kernel hash at %time% new hash:
+"%defloc%lib\certutil.exe" -hashfile "%defloc%kernel.bat" SHA512
+goto :ext
 
-
+:use_custom_kernel
+if exist "%defloc%kernel.bat" echo deleting old kernel
+if exist "%defloc%kernel.bat" del /Q "%defloc%kernel.bat"
+echo copying new kernel
+if defined %2 if exist %2 copy /V %2 "%defloc%"
+if exist "%defloc%%2" echo successfully copied %2 to %defloc%%2
+echo creating new hash
+if exist "%defloc%kernelhash.sha512" del /Q "%defloc%kernelhash.sha512"
+"%defloc%lib\certutil.exe" -hashfile "%defloc%kernel.bat" SHA512 > kernelhash.sha512
+echo Updated kernel hash at %time% new hash:
+"%defloc%lib\certutil.exe" -hashfile "%defloc%kernel.bat" SHA512
+if exist "%defloc%kernelhash.sha512" echo hash created successfully
+echo starting with new kernel
+goto :aftercustomkernel
 
 
 

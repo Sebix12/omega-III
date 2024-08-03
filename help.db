@@ -1,7 +1,21 @@
 ------ ::HELP:: ------
 exit
 help
+clear
+dir / ls
+tree
 
+pl:
+    list
+    run
+    remove
+    get
+
+fs:
+    rm
+    mkdir
+    rmdir
+    run
 
 
 ----------------------

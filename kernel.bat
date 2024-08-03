@@ -10,7 +10,12 @@ set assets=certutil.exe cipher.exe curl.exe tar.exe
 if "%1" == "checkup" goto :checkup
 if "%1" == "fs" goto :fs
 if "%1" == "pl" goto :pl
-if "%1" == "pussy" goto :xd
+if "%1" == "help" goto :help
+if "%1" == "clear" cls && goto :ext
+if "%1" == "dir" dir /b && goto :ext
+if "%1" == "ls" dir /b && goto :ext
+if "%1" == "tree" tree && goto :ext
+
 
 
 :pl
@@ -23,14 +28,16 @@ echo not supported yet...
 goto :ext
 
 :pl_list
+cd /d "%defloc%db"
 dir /b /x *.db
+cd /d "%defloc%"
 goto :ext
 
 :pl_run
-if not exist %defloc%db\%3.db goto :runnotexist 
-certutil -decode %defloc%db\%3.db %defloc%db\%3.bat >> NUL
-call %defloc%db\%3.bat
-del /q %defloc%db\%3.bat
+if not exist "%defloc%db\%3.db" goto :runnotexist 
+certutil -decode "%defloc%db\%3.db" "%defloc%db\%3.bat" >> NUL
+call "%defloc%db\%3.bat"
+del /q "%defloc%db\%3.bat"
 goto :ext
 
 :runnotexist
@@ -38,17 +45,17 @@ echo %3 does not exist try "pl list"
 goto :ext
 
 :pl_remove
-if exist %3.bat del /q %3.bat && echo removed %3.bat
-if exist %3.db del /q %3.db && echo removed %3.db
+if exist "%defloc%db\%3.bat" del /q "%defloc%db\%3.bat" && echo removed %3.bat
+if exist "%defloc%db\%3.db" del /q "%defloc%db\%3.db" && echo removed %3.db
 goto :ext
 
 :pl_getpl
-if exist %3.db echo %3 is already downloaded
-if exist %3.db goto :ext
-echo downloading %3 %downdomain%/plugin-repo/%3.db
-%defloc%lib\curl.exe %downdomain%/plugin-repo/%3.db --output %defloc%db\%3.db
-if exist %3.db echo download succeeded
-if not exist %3.db echo download failed
+if exist "%defloc%db\%3.db" echo %3 is already downloaded
+if exist "%defloc%db\%3.db" goto :ext
+echo downloading "%3" %downdomain%/plugin-repo/%3.db
+"%defloc%lib\curl.exe" %downdomain%/plugin-repo/%3.db --output "%defloc%db\%3.db"
+if exist "%defloc%db\%3.db" echo download succeeded
+if not exist "%defloc%db\%3.db" echo download failed
 goto :ext
 
 
@@ -62,25 +69,25 @@ goto :ext
 ::------
 
 :fs_rm
-del %3
+if exist "%3" del "%3"
 echo deleted file: %3
 goto :ext
 ::------
 :fs_mkdir
-mkdir %3
+if not exist "%3" mkdir "%3"
 echo created folder %3
 goto :ext
 ::------
 :fs_rmdir
-rmdir %3
+rmdir "%3"
 echo deleted %3
 goto :ext
 ::------
 :fs_run
-if not exist %3 echo %3 does not exist.
-if not exist %3 goto :ext
-if exist %3 echo %3 found, running it...
-call %3
+if not exist "%3" echo %3 does not exist.
+if not exist "%3" goto :ext
+if exist "%3" echo %3 found, running it...
+call "%3" %4
 goto :ext
 ::------
 goto :ext
@@ -156,7 +163,30 @@ cd /d "%defloc%"
 echo :----------------------------:
 goto :ext
 
-:xd
+
+
+:help
+if exist "%defloc%help.db" goto :givehelp
+if not exist "%defloc%help.db" goto :gethelp
+
+:gethelp
+echo help.db not found installing
+"%defloc%lib\curl.exe" %downdomain%/help.db --output "%defloc%help.db"
+
+:givehelp
+type help.db
+echo.
+goto :ext
+
+:kernel
+if "%2" == "version" echo kernel version: %kernelver% && goto :ext
+echo command not supported yet...
+goto :ext
+
+
+
+
+
 
 goto :ext
 
