@@ -48,16 +48,14 @@ File access tree:
                 certutil:
                     -encode
                     -decode
-                    -hashfile 
-
+                    -hashfile
                 cipher:
                     -encrypt
                     -decrypt
-            dmg:
+            datamg:
                 comp:
                     -create
                     -extract
-                get
 #
 
 command usage tree:
