@@ -4,15 +4,16 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 set defloc=%~dp0
 set domain=http://backup.xdev.lol
 set downdomain=%domain%/omega-iii/omega-iii
+set loaded_kernel=%defloc%kernel.bat
 
 ::start settings
 
-if "%1" == "clean-install" goto :reclone
-if "%1" == "update-kernel" goto :update_kernel
-if "%1" == "update-kernel-hash" goto :update_kernel_hash
-if "%1" == "use-custom-kernel" goto :use_custom_kernel
+if "%1" == "-clean-install" goto :reclone
+if "%1" == "-update-kernel" goto :update_kernel
+if "%1" == "-update-kernel-hash" goto :update_kernel_hash
+if "%1" == "-use-custom-kernel" goto :use_custom_kernel
 
-if exist "%defloc%kernel.bat" call "%defloc%kernel.bat" setup
+if exist "%loaded_kernel%" call "%loaded_kernel%" setup
 
 
 
@@ -23,7 +24,7 @@ if not exist "%defloc%lib" goto :checkup_getlib
 :checkup_afterlib
 if exist "%defloc%lib" goto :checkup_scanlib
 :checkup_afterscanlib
-if not exist "%defloc%kernel.bat" goto :checkup_getkernel
+if not exist "%loaded_kernel%" goto :checkup_getkernel
 :checkup_afterkernel
 
 
@@ -104,7 +105,7 @@ if not exist "%defloc%kernelhash.sha512" (
 )
 
 set count=0
-for /f "tokens=1* delims=:" %%A in ('""%defloc%lib\certutil.exe" -hashfile %defloc%kernel.bat SHA512"') do (
+for /f "tokens=1* delims=:" %%A in ('""%defloc%lib\certutil.exe" -hashfile "%loaded_kernel%" SHA512"') do (
     set /a count+=1
     if !count! EQU 2 (
         set "kernelhash=%%A %%B"
@@ -121,8 +122,8 @@ for /f "tokens=*" %%A in (%defloc%kernelhash.sha512) do (
 )
 
 if "%kernelhash%" == "%setkernelhash%" (
-    if exist "%defloc%kernel.bat" (
-        call "%defloc%kernel.bat" %terminal%
+    if exist "%loaded_kernel%" (
+        call "%loaded_kernel%" %terminal%
     ) else (
         goto :kernelerror
     )
@@ -192,19 +193,16 @@ goto :ext
 :use_custom_kernel
 :: set defloc=C:\Users\Sebixteam\Desktop\omega\
 
-if exist "%defloc%kernel.bat" echo deleting old kernel
+copy /V /Y "F:\omega-III\kernel.bat" "%defloc%custom_kernel.bat"
 
-if exist "%defloc%kernel.bat" del /Q "%defloc%kernel.bat"
-
-copy /V /Y "F:\omega-III\kernel.bat" "%defloc%kernel.bat"
-
-if exist "%defloc%kernel.bat" echo successfully copied %2 to %defloc%
+if exist "%defloc%custom_kernel.bat" echo successfully copied %2 to %defloc%
 
 if exist "%defloc%kernelhash.sha512" del /Q "%defloc%kernelhash.sha512"
 
-"%defloc%lib\certutil.exe" -hashfile "%defloc%kernel.bat" SHA512 > kernelhash.sha512
+"%defloc%lib\certutil.exe" -hashfile "%defloc%custom_kernel.bat" SHA512 > kernelhash.sha512
 
-call "%defloc%kernel.bat" setup
+call "%defloc%custom_kernel.bat" setup
+set loaded_kernel=%defloc%custom_kernel.bat
 goto :aftercustomkernel
 
 
@@ -215,4 +213,7 @@ goto :aftercustomkernel
 
 
 :ext
+if "%loaded_kernel%" == "%defloc%kernel.bat" goto :nocustomkernelext
+if exist "%loaded_kernel%" del /Q "%loaded_kernel%"
 
+:nocustomkernelext

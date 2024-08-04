@@ -4,10 +4,10 @@ Domains: [ backup.xdev.lol/omega-iii ]:
 #
 
 omega start vars:
-    -clean-install
-    -update-kernel
-    -update-kernel-hash
-    -use-custom-kernel
+    "-clean-install"
+    "-update-kernel"
+    "-update-kernel-hash"
+    "-use-custom-kernel"
 # 
 
 
