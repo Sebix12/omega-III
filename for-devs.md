@@ -67,4 +67,4 @@ commands: omega.cmd (clean-install/update-kernel)
 
 
 developer tools:
-autohash: http://backup.xdev.lol/omega-iii/omega-iii/autohash.bat, creates a kernel hash every 2 seconds so you dont have to
+autohash: http://backup.xdev.lol/omega-iii/omega-iii/autohash.bat, creates a kernel hash every second so you dont have to

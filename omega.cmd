@@ -52,7 +52,7 @@ if not exist "%currdownasset%" echo %currdownasset% missing downloading
 if not exist "%currdownasset%" powershell -Command "(New-Object Net.WebClient).DownloadFile('%downdomain%/lib/%currdownasset%', '%currdownasset%')"
 
 
-cd ..
+cd /d %defloc%
 goto :checkup_afterscanlib
 
 
@@ -158,17 +158,17 @@ goto :ext
 
 
 :reclone
-echo removing assest:
-echo library
+echo removing assets.
+echo removing library
 del "%defloc%lib" /q
 rmdir lib
-echo kernel
+echo removing kernel
 del "%defloc%kernel.bat"
-echo removed all current assets
-echo help
+echo removing help
 del help.db
+echo removed all defined assets
 
-echo restarting
+echo restarting!...
 goto :aftercleaninstall
 
 
